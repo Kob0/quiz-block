@@ -1,3 +1,4 @@
+import React from 'react';
 import './index.scss';
 
 const questions = [
@@ -22,37 +23,59 @@ const questions = [
   },
 ];
 
-function Result() {
+function Result({ correctAnswers }) {
   return (
     <div className="result">
-      <img src="https://cdn-icons-png.flaticon.com/512/2278/2278992.png" />
-      <h2>Вы отгадали 3 ответа из 10</h2>
-      <button>Попробовать снова</button>
+      <img src="https://cdn-icons-png.flaticon.com/512/2278/2278992.png" alt="" />
+      <h2>
+        Вы отгадали {correctAnswers} ответа(ов) из {questions.length}
+      </h2>
+      <a href="/">
+        <button>Попробовать снова</button>
+      </a>
     </div>
   );
 }
 
-function Game() {
+function Game({ quizStep, currentQuestion, onClickAnswer }) {
+  const progressBarPercentage = Math.round((quizStep / questions.length) * 100);
+
   return (
     <>
       <div className="progress">
-        <div style={{ width: '50%' }} className="progress__inner"></div>
+        <div style={{ width: `${progressBarPercentage}%` }} className="progress__inner"></div>
       </div>
-      <h1>Что такое useState?</h1>
+      <h1>{currentQuestion.title}</h1>
       <ul>
-        <li>Это функция для хранения данных компонента</li>
-        <li>Это глобальный стейт</li>
-        <li>Это когда на ты никому не нужен</li>
+        {currentQuestion.variants.map((text, index) => (
+          <li onClick={() => onClickAnswer(index)} key={text}>
+            {text}
+          </li>
+        ))}
       </ul>
     </>
   );
 }
 
 function App() {
+  const [quizStep, setQuizStep] = React.useState(0);
+  const [correctAnswers, setCorrectAnswers] = React.useState(0);
+  const currentQuestion = questions[quizStep];
+
+  const onClickAnswer = (index) => {
+    setQuizStep(quizStep + 1);
+    if (index === currentQuestion.correct) {
+      setCorrectAnswers(correctAnswers + 1);
+    }
+  };
+
   return (
     <div className="App">
-      <Game />
-      {/* <Result /> */}
+      {quizStep !== questions.length ? (
+        <Game quizStep={quizStep} currentQuestion={currentQuestion} onClickAnswer={onClickAnswer} />
+      ) : (
+        <Result correctAnswers={correctAnswers} />
+      )}
     </div>
   );
 }
